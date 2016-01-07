@@ -23,6 +23,8 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        victories = 0,
+        speed = 0,
         lastTime;
 
     canvas.width = 505;
@@ -80,7 +82,8 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
+        checkVictory();
     }
 
     /* This is called by the update function  and loops through all of the
@@ -95,6 +98,41 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+    }
+
+    /* This function compares the current player position with the position
+     * of all enemies/obstacles.  If they overlap, the player dies and is
+     * reset to the starting row.
+     */
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            if (enemy.row == player.row && Math.abs(enemy.x - player.x) < 75) {
+            // player dies
+                player.reset();
+            }
+        });
+    }
+
+    /* Check if player made it to water and adjust game if so */
+    function checkVictory() {
+        if (player.row == 0) {
+            victories += 1;
+            speed += 1;
+            allEnemies.forEach(function(enemy) {
+                enemy.speedUp();
+            });
+            if (allEnemies.length < 7) {
+                if (victories % 3 == 0) {
+                    allEnemies.push(new Enemy());
+                }
+            } else {
+                speed += 1;
+                allEnemies.forEach(function(enemy) {
+                    enemy.speedUp();
+                });
+            }
+        player.reset();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
