@@ -106,22 +106,31 @@ var Engine = (function(global) {
      */
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
-            if (enemy.row == player.row && Math.abs(enemy.x - player.x) < 75) {
-            // player dies
+            // check for player
+            if (enemy.row === player.row && Math.abs(enemy.x - player.x) < 75) {
+                // player dies
                 player.reset();
             }
+            allEnemies.forEach(function(otherEnemy) {
+                if (enemy.row === otherEnemy.row && enemy.x < otherEnemy.x && otherEnemy.x - enemy.x < 101) {
+                    var temp = enemy.speed;
+                    enemy.speed = otherEnemy.speed;
+                    otherEnemy.speed = temp;
+                    enemy.x = otherEnemy.x - 101;
+                }
+            });
         });
     }
 
     /* Check if player made it to water and adjust game if so */
     function checkVictory() {
-        if (player.row == 0) {
+        if (player.row === 0) {
             victories += 1;
             speed += 1;
             allEnemies.forEach(function(enemy) {
                 enemy.speedUp();
             });
-            if (allEnemies.length < 7) {
+            if (allEnemies.length < 6) {
                 if (victories % 3 == 0) {
                     allEnemies.push(new Enemy());
                 }
@@ -131,7 +140,7 @@ var Engine = (function(global) {
                     enemy.speedUp();
                 });
             }
-        player.reset();
+            player.reset();
         }
     }
 
